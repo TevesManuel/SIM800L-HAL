@@ -48,10 +48,24 @@ bool SIM800L::sendHTTP(String url, HTTPMethod method, String data="")
         if(method == GET)
         {
             if (sendATCommand(&this->serial, "AT+HTTPGET", "200")) { // Send petition
-                Serial.println("Solicitud GET exitosa.");
+                Serial.println("200");
             } else {
-                Serial.println("Error en la solicitud GET.");
+                Serial.println("Error");
             }
+        }
+        else if(method == POST)
+        {
+            sendATCommand(&this->serial, "AT+HTTPPARA=\"CONTENT\",,\"application/json\"", "OK");
+            if (sendATCommand(&this->serial, "AT+HTTPDATA=" + String(data.length()) + ",10000", "DOWNLOAD")) {
+                this->serial.print(data);
+                delay(1000);
+                if (sendATCommand(&this->serial, "AT+HTTPACTION=1", "200")) {
+                    Serial.println("200");
+                } else {
+                    Serial.println("Error");
+                }
+            }
+            sendATCommand(&this->serial, "AT+HTTPTERM", "OK");
         }
     }
 }
